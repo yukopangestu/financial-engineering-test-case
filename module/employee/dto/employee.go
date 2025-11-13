@@ -1,9 +1,8 @@
 package dto
 
-type Borrower struct {
-	Id          string `json:"id"`
-	EmployeeNo  string `json:"employee_no"`
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
+type CreateEmployee struct {
+	Name        string `json:"name" validate:"required"`
+	EmployeeNum string `json:"employee_num"`
+	PhoneNumber string `json:"phone_number" validate:"required"`
+	Email       string `json:"email" validate:"email"`
 }

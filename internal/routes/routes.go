@@ -4,6 +4,9 @@ import (
 	bHandler "financial-engineering-test-case/module/borrower/handler"
 	bRepository "financial-engineering-test-case/module/borrower/repository"
 	bService "financial-engineering-test-case/module/borrower/service"
+	eHandler "financial-engineering-test-case/module/employee/handler"
+	eRepository "financial-engineering-test-case/module/employee/repository"
+	eService "financial-engineering-test-case/module/employee/service"
 	"financial-engineering-test-case/module/loan/handler"
 
 	"github.com/labstack/echo/v4"
@@ -22,6 +25,10 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	borrowerService := bService.NewBorrowerService(borrowerRepository)
 	borrowerHandler := bHandler.NewBorrowerHandler(borrowerService)
 
+	employeeRepository := eRepository.NewEmployeeRepository(db)
+	employeeService := eService.NewEmployeeService(employeeRepository)
+	employeeHandler := eHandler.NewEmployeeHandler(employeeService)
+
 	loanHandler := handler.NewLoanHandler()
 
 	// API v1 routes
@@ -30,6 +37,10 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 		// Managing Borrowers data
 		borrowers := v1.Group("/borrowers")
 		borrowers.POST("/", borrowerHandler.CreateBorrower)
+
+		// Managing Employees data
+		employees := v1.Group("/employees")
+		employees.POST("/", employeeHandler.CreateEmployee)
 
 		// Loan routes
 		loans := v1.Group("/loans")
