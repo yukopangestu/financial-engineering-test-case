@@ -43,9 +43,3 @@ func (h *BorrowerHandler) CreateBorrower(c echo.Context) error {
 		"message": "Borrower successfully created",
 	})
 }
-
-func (h *BorrowerHandler) GetBorrowers(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Borrower successfully created",
-	})
-}
