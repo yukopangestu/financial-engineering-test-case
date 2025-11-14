@@ -12,7 +12,6 @@ type BorrowerService struct {
 	borrowerRepository domain.BorrowerRepository
 }
 
-// Ensure BorrowerService implements domain.BorrowerService interface
 var _ domain.BorrowerService = (*BorrowerService)(nil)
 
 func NewBorrowerService(

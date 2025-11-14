@@ -12,7 +12,6 @@ type BorrowerRepository struct {
 	db *gorm.DB
 }
 
-// Ensure BorrowerRepository implements domain.BorrowerRepository interface
 var _ domain.BorrowerRepository = (*BorrowerRepository)(nil)
 
 func NewBorrowerRepository(db *gorm.DB) *BorrowerRepository {

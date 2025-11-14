@@ -1,6 +1,7 @@
 package service
 
 import (
+	"financial-engineering-test-case/module/employee/domain"
 	"financial-engineering-test-case/module/employee/dto"
 	"financial-engineering-test-case/module/employee/repository"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 type EmployeeService struct {
 	employeeRepository *repository.EmployeeRepository
 }
+
+var _ domain.EmployeeService = (*EmployeeService)(nil)
 
 func NewEmployeeService(
 	employeeRepository *repository.EmployeeRepository) *EmployeeService {

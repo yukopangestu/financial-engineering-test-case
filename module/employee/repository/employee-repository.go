@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"financial-engineering-test-case/module/employee/domain"
 	"financial-engineering-test-case/module/employee/dto"
 
 	"gorm.io/gorm"
@@ -9,6 +10,8 @@ import (
 type EmployeeRepository struct {
 	db *gorm.DB
 }
+
+var _ domain.EmployeeRepository = (*EmployeeRepository)(nil)
 
 func NewEmployeeRepository(db *gorm.DB) *EmployeeRepository {
 	return &EmployeeRepository{
