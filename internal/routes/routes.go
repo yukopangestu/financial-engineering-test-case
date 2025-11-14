@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"financial-engineering-test-case/internal/config"
 	bHandler "financial-engineering-test-case/module/borrower/handler"
 	bRepository "financial-engineering-test-case/module/borrower/repository"
 	bService "financial-engineering-test-case/module/borrower/service"
@@ -16,7 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupRoutes(e *echo.Echo, db *gorm.DB) {
+func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -32,7 +33,7 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	employeeHandler := eHandler.NewEmployeeHandler(employeeService)
 
 	loanRepository := lRepository.NewLoanRepository(db)
-	loanService := lService.NewLoanService(loanRepository, borrowerService)
+	loanService := lService.NewLoanService(loanRepository, borrowerService, cfg)
 	loanHandler := lHandler.NewLoanHandler(loanService)
 
 	// API v1 routes

@@ -29,7 +29,7 @@ func StartApp() {
 	e := echo.New()
 
 	// Setup routes
-	routes.SetupRoutes(e, db)
+	routes.SetupRoutes(e, db, cfg)
 
 	// Start server
 	port := ":11230"

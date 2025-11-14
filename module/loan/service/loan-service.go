@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"financial-engineering-test-case/internal/config"
 	"financial-engineering-test-case/internal/database"
 	bService "financial-engineering-test-case/module/borrower/service"
 	"financial-engineering-test-case/module/loan/domain"
@@ -15,11 +16,13 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf"
+	"gopkg.in/gomail.v2"
 )
 
 type LoanService struct {
 	LoanRepository  *repository.LoanRepository
 	BorrowerService *bService.BorrowerService
+	Config          *config.Config
 }
 
 var _ domain.LoanService = (*LoanService)(nil)
@@ -27,10 +30,12 @@ var _ domain.LoanService = (*LoanService)(nil)
 func NewLoanService(
 	LoanRepository *repository.LoanRepository,
 	BorrowerService *bService.BorrowerService,
+	Config *config.Config,
 ) *LoanService {
 	return &LoanService{
 		LoanRepository:  LoanRepository,
 		BorrowerService: BorrowerService,
+		Config:          Config,
 	}
 }
 
@@ -112,6 +117,72 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 	return nil
 }
 
+func (s LoanService) sendInvestorEmail(investorEmail, investorName string, loanNumber string, investmentAmount float64, pdfPath string) error {
+	// Check if SMTP is configured
+	if s.Config.SMTPUsername == "" || s.Config.SMTPPassword == "" {
+		// SMTP not configured, skip sending email (log this in production)
+		return nil
+	}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", s.Config.SMTPFrom)
+	m.SetHeader("To", investorEmail)
+	m.SetHeader("Subject", "Investment Confirmation - Loan "+loanNumber)
+
+	// HTML email body
+	body := fmt.Sprintf(`
+		<html>
+		<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+			<h2 style="color: #2c3e50;">Investment Confirmation</h2>
+			<p>Dear %s,</p>
+			<p>Thank you for your investment in our loan program. This email confirms your investment details:</p>
+
+			<table style="border-collapse: collapse; margin: 20px 0;">
+				<tr>
+					<td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Loan Number:</strong></td>
+					<td style="padding: 8px; border: 1px solid #ddd;">%s</td>
+				</tr>
+				<tr>
+					<td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Investment Amount:</strong></td>
+					<td style="padding: 8px; border: 1px solid #ddd;">$%.2f</td>
+				</tr>
+				<tr>
+					<td style="padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Date:</strong></td>
+					<td style="padding: 8px; border: 1px solid #ddd;">%s</td>
+				</tr>
+			</table>
+
+			<p>Please find the loan investment agreement letter attached to this email for your records.</p>
+
+			<p>The loan will be processed and disbursed according to the terms outlined in the agreement. You will receive further updates on the disbursement of the loan.</p>
+
+			<p style="margin-top: 30px;">Best regards,<br>
+			<strong>Loan Management Team</strong></p>
+
+			<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+			<p style="font-size: 12px; color: #777;">This is an automated message. Please do not reply to this email.</p>
+		</body>
+		</html>
+	`, investorName, loanNumber, investmentAmount, time.Now().Format("January 2, 2006"))
+
+	m.SetBody("text/html", body)
+
+	// Attach PDF if path is provided
+	if pdfPath != "" {
+		m.Attach(pdfPath)
+	}
+
+	// Create dialer
+	d := gomail.NewDialer(s.Config.SMTPHost, s.Config.SMTPPort, s.Config.SMTPUsername, s.Config.SMTPPassword)
+
+	// Send email
+	if err := d.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email to %s: %w", investorEmail, err)
+	}
+
+	return nil
+}
+
 func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 	loan, err := s.LoanRepository.GetLoanByID(id)
 	if err != nil {
@@ -133,6 +204,8 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 
 	// Validate and create loan-investor records
 	var loanInvestors []database.LoanInvestor
+	var investorDetails []database.Investor // Store investor details for later email sending
+
 	for _, investor := range payload.Investors {
 		// Check if investor exists
 		inv, err := s.LoanRepository.GetInvestorByID(investor.ID)
@@ -156,6 +229,7 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 		}
 
 		loanInvestors = append(loanInvestors, loanInvestor)
+		investorDetails = append(investorDetails, inv)
 	}
 
 	// Generate PDF agreement letter
@@ -176,6 +250,17 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 	err = s.LoanRepository.UploadLoanByID(updatedLoan)
 	if err != nil {
 		return fmt.Errorf("failed to update loan: %w", err)
+	}
+
+	// Send confirmation emails to all investors with PDF attachment
+	for i, investor := range loanInvestors {
+		inv := investorDetails[i]
+		err = s.sendInvestorEmail(inv.Email, inv.Name, loan.LoanNumber, investor.InvestmentAmount, pdfPath)
+		if err != nil {
+			// Log the error but don't fail the entire transaction
+			// In production, you might want to queue this for retry
+			fmt.Printf("Warning: failed to send email to investor %s: %v\n", inv.Email, err)
+		}
 	}
 
 	return nil
