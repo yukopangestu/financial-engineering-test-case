@@ -13,6 +13,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/jung-kurt/gofpdf"
 )
 
 type LoanService struct {
@@ -108,5 +110,191 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 	}
 
 	return nil
+}
 
+func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
+	loan, err := s.LoanRepository.GetLoanByID(id)
+	if err != nil {
+		return err
+	}
+	if loan.Status != "approved" {
+		return errors.New("Loan status is not eligible for this to proceed")
+	}
+
+	// Validate total investment amount
+	totalInvestment := 0.0
+	for _, investor := range payload.Investors {
+		totalInvestment += investor.InvestmentAmount
+	}
+
+	if totalInvestment != loan.Amount {
+		return fmt.Errorf("total investment amount ($%.2f) must equal loan amount ($%.2f)", totalInvestment, loan.Amount)
+	}
+
+	// Validate and create loan-investor records
+	var loanInvestors []database.LoanInvestor
+	for _, investor := range payload.Investors {
+		// Check if investor exists
+		inv, err := s.LoanRepository.GetInvestorByID(investor.ID)
+		if err != nil {
+			return fmt.Errorf("investor with ID %d not found: %w", investor.ID, err)
+		}
+		if inv.ID == 0 {
+			return fmt.Errorf("investor with ID %d does not exist", investor.ID)
+		}
+
+		// Create loan-investor record
+		loanInvestor := database.LoanInvestor{
+			LoanID:           id,
+			InvestorID:       investor.ID,
+			InvestmentAmount: investor.InvestmentAmount,
+		}
+
+		err = s.LoanRepository.CreateLoanInvestor(loanInvestor)
+		if err != nil {
+			return fmt.Errorf("failed to create loan-investor record: %w", err)
+		}
+
+		loanInvestors = append(loanInvestors, loanInvestor)
+	}
+
+	// Generate PDF agreement letter
+	pdfPath, err := s.generateAgreementLetterPDF(loan, loanInvestors)
+	if err != nil {
+		return fmt.Errorf("failed to generate agreement letter: %w", err)
+	}
+
+	// Update loan status and set invested date
+	investedAt := time.Now()
+	updatedLoan := database.Loan{
+		ID:              id,
+		Status:          "invested",
+		InvestedAt:      &investedAt,
+		AgreementLetter: pdfPath,
+	}
+
+	err = s.LoanRepository.UploadLoanByID(updatedLoan)
+	if err != nil {
+		return fmt.Errorf("failed to update loan: %w", err)
+	}
+
+	return nil
+}
+
+func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []database.LoanInvestor) (string, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	// Title
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(0, 10, "LOAN INVESTMENT AGREEMENT LETTER")
+	pdf.Ln(15)
+
+	// Date
+	pdf.SetFont("Arial", "", 12)
+	pdf.Cell(0, 10, fmt.Sprintf("Date: %s", time.Now().Format("January 2, 2006")))
+	pdf.Ln(10)
+
+	// Loan Details Section
+	pdf.SetFont("Arial", "B", 14)
+	pdf.Cell(0, 10, "Loan Details")
+	pdf.Ln(8)
+
+	pdf.SetFont("Arial", "", 11)
+	pdf.Cell(50, 8, "Loan Number:")
+	pdf.Cell(0, 8, loan.LoanNumber)
+	pdf.Ln(6)
+
+	pdf.Cell(50, 8, "Loan Amount:")
+	pdf.Cell(0, 8, fmt.Sprintf("$%.2f", loan.Amount))
+	pdf.Ln(6)
+
+	pdf.Cell(50, 8, "Interest Rate:")
+	pdf.Cell(0, 8, fmt.Sprintf("%.2f%%", loan.Interest))
+	pdf.Ln(6)
+
+	pdf.Cell(50, 8, "Borrower ID:")
+	pdf.Cell(0, 8, fmt.Sprintf("%d", loan.BorrowerID))
+	pdf.Ln(12)
+
+	// Investors Section
+	pdf.SetFont("Arial", "B", 14)
+	pdf.Cell(0, 10, "Investment Details")
+	pdf.Ln(8)
+
+	pdf.SetFont("Arial", "", 11)
+	totalInvestment := 0.0
+
+	for i, inv := range investors {
+		pdf.SetFont("Arial", "B", 11)
+		pdf.Cell(0, 8, fmt.Sprintf("Investor %d:", i+1))
+		pdf.Ln(6)
+
+		pdf.SetFont("Arial", "", 11)
+		pdf.Cell(10, 6, "")
+		pdf.Cell(50, 6, "Investor ID:")
+		pdf.Cell(0, 6, fmt.Sprintf("%d", inv.InvestorID))
+		pdf.Ln(6)
+
+		pdf.Cell(10, 6, "")
+		pdf.Cell(50, 6, "Investment Amount:")
+		pdf.Cell(0, 6, fmt.Sprintf("$%.2f", inv.InvestmentAmount))
+		pdf.Ln(6)
+
+		totalInvestment += inv.InvestmentAmount
+	}
+
+	pdf.Ln(6)
+	pdf.SetFont("Arial", "B", 11)
+	pdf.Cell(60, 8, "Total Investment:")
+	pdf.Cell(0, 8, fmt.Sprintf("$%.2f", totalInvestment))
+	pdf.Ln(15)
+
+	// Terms and Conditions
+	pdf.SetFont("Arial", "B", 14)
+	pdf.Cell(0, 10, "Terms and Conditions")
+	pdf.Ln(8)
+
+	pdf.SetFont("Arial", "", 10)
+	terms := []string{
+		"1. The investors agree to invest the specified amounts in the loan.",
+		"2. The loan will be disbursed to the borrower after all investment funds are received.",
+		"3. The borrower agrees to repay the loan with the specified interest rate.",
+		"4. Returns will be distributed to investors proportionally to their investment amounts.",
+		"5. This agreement is binding and governed by applicable laws.",
+	}
+
+	for _, term := range terms {
+		pdf.MultiCell(0, 6, term, "", "", false)
+		pdf.Ln(2)
+	}
+
+	pdf.Ln(15)
+
+	// Signatures
+	pdf.SetFont("Arial", "B", 12)
+	pdf.Cell(0, 10, "Signatures")
+	pdf.Ln(10)
+
+	pdf.SetFont("Arial", "", 10)
+	pdf.Cell(90, 20, "________________________")
+	pdf.Cell(90, 20, "________________________")
+	pdf.Ln(6)
+	pdf.Cell(90, 6, "Authorized Officer")
+	pdf.Cell(90, 6, "Date")
+
+	// Save PDF
+	uploadDir := "./uploads/agreement-letters"
+	os.MkdirAll(uploadDir, os.ModePerm)
+
+	fileName := fmt.Sprintf("agreement_%s_%d.pdf", loan.LoanNumber, time.Now().Unix())
+	// Replace "/" in loan number with "_" for valid filename
+	fileName = filepath.Join(uploadDir, filepath.Base(fileName))
+
+	err := pdf.OutputFileAndClose(fileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate PDF: %w", err)
+	}
+
+	return fileName, nil
 }

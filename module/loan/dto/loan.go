@@ -14,3 +14,12 @@ type ApproveLoanRequest struct {
 	PhotoOfVisit *multipart.FileHeader `from:"document" validate:"required"`
 	ApprovalDate string                `json:"approval_date" validate:"required"`
 }
+
+type InvestLoanRequest struct {
+	Investors []Investor `json:"investors" validate:"required"`
+}
+
+type Investor struct {
+	ID               uint    `json:"id" validate:"required"`
+	InvestmentAmount float64 `json:"investment_amount" validate:"required,gt=0"`
+}

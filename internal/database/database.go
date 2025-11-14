@@ -68,6 +68,20 @@ type Investor struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
+type LoanInvestor struct {
+	ID               uint           `gorm:"primaryKey;autoIncrement" json:"id"`
+	LoanID           uint           `gorm:"not null;index" json:"loan_id"`
+	InvestorID       uint           `gorm:"not null;index" json:"investor_id"`
+	InvestmentAmount float64        `gorm:"type:decimal(10,2)" json:"investment_amount"`
+	CreatedAt        time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt        time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt        gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+
+	// Relationships
+	Loan     Loan     `gorm:"foreignKey:LoanID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"loan,omitempty"`
+	Investor Investor `gorm:"foreignKey:InvestorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"investor,omitempty"`
+}
+
 var DB *gorm.DB
 
 func InitDB(cfg *config.Config) (*gorm.DB, error) {
@@ -101,6 +115,7 @@ func AutoMigrate() error {
 		Employee{},
 		Investor{},
 		Loan{},
+		LoanInvestor{},
 	)
 
 	if err != nil {

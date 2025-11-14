@@ -48,3 +48,32 @@ func (r LoanRepository) UploadLoanByID(data database.Loan) error {
 
 	return nil
 }
+
+func (r LoanRepository) GetInvestorByID(id uint) (database.Investor, error) {
+	var investor database.Investor
+	result := r.db.First(&investor, id)
+	if result.Error != nil {
+		return database.Investor{}, result.Error
+	}
+
+	return investor, nil
+}
+
+func (r LoanRepository) CreateLoanInvestor(data database.LoanInvestor) error {
+	result := r.db.Create(&data)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (r LoanRepository) GetLoanInvestorsByLoanID(loanID uint) ([]database.LoanInvestor, error) {
+	var loanInvestors []database.LoanInvestor
+	result := r.db.Preload("Investor").Where("loan_id = ?", loanID).Find(&loanInvestors)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return loanInvestors, nil
+}
