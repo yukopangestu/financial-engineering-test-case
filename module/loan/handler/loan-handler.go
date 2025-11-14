@@ -4,6 +4,7 @@ import (
 	"financial-engineering-test-case/module/loan/dto"
 	"financial-engineering-test-case/module/loan/service"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -44,6 +45,26 @@ func (h *LoanHandler) ProposeLoan(c echo.Context) error {
 }
 
 func (h *LoanHandler) ApproveLoan(c echo.Context) error {
+	var req dto.ApproveLoanRequest
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": err.Error(),
+			"code":    http.StatusBadRequest,
+		})
+	}
+
+	id := c.Param("id")
+	LoanID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Error when Converting Uid",
+		})
+	}
+
+	req.ID = uint(LoanID)
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "Loan successfully approved",

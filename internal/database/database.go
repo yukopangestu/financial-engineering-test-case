@@ -40,6 +40,7 @@ type Loan struct {
 	Status                string         `gorm:"size:50;check:status IN ('proposed','approved','invested','disbursed')" json:"status"`
 	Amount                float64        `gorm:"type:decimal(10,2)" json:"amount"`
 	Interest              float64        `gorm:"type:decimal(10,2)" json:"interest"`
+	ProofOfVisit          string         `gorm:"text" json:"proof_of_visit"`
 	AgreementLetter       string         `gorm:"text" json:"agreement_letter"`
 	SignedAgreementLetter string         `gorm:"text" json:"signed_agreement_letter"`
 	ApprovedAt            *time.Time     `gorm:"type:datetime" json:"approved_at,omitempty"`
