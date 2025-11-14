@@ -49,6 +49,9 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 		// Loan routes
 		loans := v1.Group("/loans")
 		loans.POST("/propose", loanHandler.ProposeLoan)
+		loans.PUT("/{id}/approve", loanHandler.ApproveLoan)
+		loans.PUT("/{id}/invest", loanHandler.InvestLoan)
+		loans.PUT("/{id}/disburse", loanHandler.InvestLoan)
 	}
 
 	// Health check

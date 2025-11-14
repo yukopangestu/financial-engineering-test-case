@@ -34,16 +34,37 @@ type Employee struct {
 type Loan struct {
 	ID                    uint           `gorm:"primaryKey;autoIncrement" json:"id"`
 	LoanNumber            string         `gorm:"size:255" json:"loan_number"`
-	EmployeeId            string         `gorm:"size:255" json:"employee_id"`
-	BorrowerId            string         `gorm:"size:255" json:"borrower_id"`
-	Status                string         `gorm:"size:255" json:"status"`
+	ApprovalEmployeeID    *uint          `gorm:"index" json:"approval_employee_id,omitempty"`
+	DisbursedEmployeeID   *uint          `gorm:"index" json:"disbursed_employee_id,omitempty"`
+	BorrowerID            uint           `gorm:"not null;index" json:"borrower_id"`
+	Status                string         `gorm:"size:50;check:status IN ('proposed','approved','invested','disbursed')" json:"status"`
 	Amount                float64        `gorm:"type:decimal(10,2)" json:"amount"`
 	Interest              float64        `gorm:"type:decimal(10,2)" json:"interest"`
 	AgreementLetter       string         `gorm:"text" json:"agreement_letter"`
 	SignedAgreementLetter string         `gorm:"text" json:"signed_agreement_letter"`
+	ApprovedAt            *time.Time     `gorm:"type:datetime" json:"approved_at,omitempty"`
+	InvestedAt            *time.Time     `gorm:"type:datetime" json:"invested_at,omitempty"`
+	DisbursementDate      *time.Time     `gorm:"type:datetime" json:"disbursement_date,omitempty"`
 	CreatedAt             time.Time      `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt             time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 	DeletedAt             gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+
+	// Relationships
+	Borrower          Borrower  `gorm:"foreignKey:BorrowerID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"borrower,omitempty"`
+	ApprovalEmployee  *Employee `gorm:"foreignKey:ApprovalEmployeeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"approval_employee,omitempty"`
+	DisbursedEmployee *Employee `gorm:"foreignKey:DisbursedEmployeeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"disbursed_employee,omitempty"`
+}
+
+type Investor struct {
+	ID             uint           `gorm:"primaryKey;autoIncrement" json:"id"`
+	InvestorNumber string         `gorm:"size:255" json:"investor_number"`
+	Name           string         `gorm:"not null;size:255" json:"name"`
+	PhoneNumber    string         `gorm:"size:20" json:"phone_number"`
+	Email          string         `gorm:"unique;size:255" json:"email"`
+	InvestedAmount float64        `gorm:"type:decimal(10,2)" json:"invested_amount"`
+	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt      time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 var DB *gorm.DB
@@ -77,8 +98,8 @@ func AutoMigrate() error {
 	err := DB.AutoMigrate(
 		Borrower{},
 		Employee{},
+		Investor{},
 		Loan{},
-		// Add other models here as you create them
 	)
 
 	if err != nil {

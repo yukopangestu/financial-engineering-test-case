@@ -26,7 +26,7 @@ func NewLoanService(
 	}
 }
 
-func (s LoanService) ProposeLoan(payload dto.ProposeLoanRequest) error {
+func (s LoanService) ProposeLoan(payload *dto.ProposeLoanRequest) error {
 	var data database.Loan
 
 	borrowers, err := s.BorrowerService.GetBorrowerById(payload.BorrowerId)
@@ -39,7 +39,7 @@ func (s LoanService) ProposeLoan(payload dto.ProposeLoanRequest) error {
 
 	data = database.Loan{
 		Amount:     payload.Amount,
-		BorrowerId: payload.BorrowerId,
+		BorrowerID: payload.BorrowerId,
 		Interest:   payload.InterestRate,
 		LoanNumber: fmt.Sprintf("%d/%d/%d", time.Now().Year(), time.Now().Month(), rand.Int()),
 	}

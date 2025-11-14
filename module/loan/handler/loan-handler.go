@@ -29,18 +29,29 @@ func (h *LoanHandler) ProposeLoan(c echo.Context) error {
 		})
 	}
 
-	// Validate request
 	if err := c.Validate(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	// Call service layer
-	// result, err := h.loanService.ProposeLoan(c.Request().Context(), &req)
-	// if err != nil {
-	//     return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	// }
+	err := h.LoanService.ProposeLoan(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "Loan proposal received",
+	})
+}
+
+func (h *LoanHandler) ApproveLoan(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Loan successfully approved",
+	})
+}
+
+func (h *LoanHandler) InvestLoan(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Loan successfully invested",
 	})
 }

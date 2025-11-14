@@ -7,7 +7,7 @@ import (
 
 type BorrowerRepository interface {
 	CreateNewBorrower(payload dto.CreaterBorrower) error
-	GetBorrowerById(id string) (database.Borrower, error)
+	GetBorrowerById(id uint) (database.Borrower, error)
 }
 
 type BorrowerService interface {

@@ -28,6 +28,6 @@ func (s BorrowerService) CreateNewBorrower(payload dto.CreaterBorrower) error {
 	return s.borrowerRepository.CreateNewBorrower(payload)
 }
 
-func (s BorrowerService) GetBorrowerById(id string) (database.Borrower, error) {
+func (s BorrowerService) GetBorrowerById(id uint) (database.Borrower, error) {
 	return s.borrowerRepository.GetBorrowerById(id)
 }

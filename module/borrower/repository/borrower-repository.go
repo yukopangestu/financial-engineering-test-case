@@ -39,7 +39,7 @@ func (b BorrowerRepository) GetBorrowers(payload database.Borrower) (database.Bo
 	return payload, nil
 }
 
-func (b BorrowerRepository) GetBorrowerById(id string) (database.Borrower, error) {
+func (b BorrowerRepository) GetBorrowerById(id uint) (database.Borrower, error) {
 	var borrowerData database.Borrower
 	result := b.db.First(&borrowerData, id)
 	if result.Error != nil {
