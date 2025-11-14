@@ -7,7 +7,9 @@ import (
 	eHandler "financial-engineering-test-case/module/employee/handler"
 	eRepository "financial-engineering-test-case/module/employee/repository"
 	eService "financial-engineering-test-case/module/employee/service"
-	"financial-engineering-test-case/module/loan/handler"
+	lHandler "financial-engineering-test-case/module/loan/handler"
+	lRepository "financial-engineering-test-case/module/loan/repository"
+	lService "financial-engineering-test-case/module/loan/service"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,7 +31,9 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	employeeService := eService.NewEmployeeService(employeeRepository)
 	employeeHandler := eHandler.NewEmployeeHandler(employeeService)
 
-	loanHandler := handler.NewLoanHandler()
+	loanRepository := lRepository.NewLoanRepository()
+	loanService := lService.NewLoanService(loanRepository, borrowerRepository)
+	loanHandler := lHandler.NewLoanHandler(loanService)
 
 	// API v1 routes
 	v1 := e.Group("/api/v1")

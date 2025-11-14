@@ -1,7 +1,26 @@
 package service
 
-type LoanService struct{}
+import (
+	bRepository "financial-engineering-test-case/module/borrower/repository"
+	"financial-engineering-test-case/module/loan/dto"
+	"financial-engineering-test-case/module/loan/repository"
+)
 
-func NewLoanService() *LoanService {
-	return &LoanService{}
+type LoanService struct {
+	LoanRepository     *repository.LoanRepository
+	BorrowerRepository *bRepository.BorrowerRepository
+}
+
+func NewLoanService(
+	LoanRepository *repository.LoanRepository,
+	BorrowerRepository *bRepository.BorrowerRepository,
+) *LoanService {
+	return &LoanService{
+		LoanRepository:     LoanRepository,
+		BorrowerRepository: BorrowerRepository,
+	}
+}
+
+func (s LoanService) ProposeLoan(payload dto.ProposeLoanRequest) {
+
 }

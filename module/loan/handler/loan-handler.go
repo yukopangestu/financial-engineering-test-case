@@ -2,19 +2,21 @@ package handler
 
 import (
 	"financial-engineering-test-case/module/loan/dto"
+	"financial-engineering-test-case/module/loan/service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type LoanHandler struct {
-	// Add your service dependency here
-	// loanService service.LoanService
+	LoanService *service.LoanService
 }
 
-func NewLoanHandler() *LoanHandler {
+func NewLoanHandler(
+	LoanService *service.LoanService,
+) *LoanHandler {
 	return &LoanHandler{
-		// Initialize your service here
+		LoanService: LoanService,
 	}
 }
 
