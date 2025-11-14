@@ -8,6 +8,9 @@ import (
 	eHandler "financial-engineering-test-case/module/employee/handler"
 	eRepository "financial-engineering-test-case/module/employee/repository"
 	eService "financial-engineering-test-case/module/employee/service"
+	iHandler "financial-engineering-test-case/module/investor/handler"
+	iRepository "financial-engineering-test-case/module/investor/repository"
+	iService "financial-engineering-test-case/module/investor/service"
 	lHandler "financial-engineering-test-case/module/loan/handler"
 	lRepository "financial-engineering-test-case/module/loan/repository"
 	lService "financial-engineering-test-case/module/loan/service"
@@ -32,6 +35,10 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 	employeeService := eService.NewEmployeeService(employeeRepository)
 	employeeHandler := eHandler.NewEmployeeHandler(employeeService)
 
+	investorRepository := iRepository.NewInvestorRepository(db)
+	investorService := iService.NewInvestorService(investorRepository)
+	investorHandler := iHandler.NewInvestorHandler(investorService)
+
 	loanRepository := lRepository.NewLoanRepository(db)
 	loanService := lService.NewLoanService(loanRepository, borrowerService, cfg)
 	loanHandler := lHandler.NewLoanHandler(loanService)
@@ -46,6 +53,10 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 		// Managing Employees data
 		employees := v1.Group("/employees")
 		employees.POST("/", employeeHandler.CreateEmployee)
+
+		// Managing Investors data
+		investors := v1.Group("/investors")
+		investors.POST("/", investorHandler.CreateInvestor)
 
 		// Loan routes
 		loans := v1.Group("/loans")
