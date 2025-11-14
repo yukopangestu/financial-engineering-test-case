@@ -15,9 +15,9 @@ type Borrower struct {
 	Name           string         `gorm:"not null;size:255" json:"name"`
 	PhoneNumber    string         `gorm:"size:20" json:"phone_number"`
 	Email          string         `gorm:"unique;size:255" json:"email"`
-	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"createdAt"`
-	UpdatedAt      time.Time      `gorm:"autoUpdateTime" json:"updatedAt"`
-	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deletedAt,omitempty"`
+	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt      time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 type Employee struct {
@@ -26,9 +26,24 @@ type Employee struct {
 	Name           string         `gorm:"not null;size:255" json:"name"`
 	PhoneNumber    string         `gorm:"size:20" json:"phone_number"`
 	Email          string         `gorm:"unique;size:255" json:"email"`
-	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"createdAt"`
-	UpdatedAt      time.Time      `gorm:"autoUpdateTime" json:"updatedAt"`
-	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deletedAt,omitempty"`
+	CreatedAt      time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt      time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+}
+
+type Loan struct {
+	ID                    uint           `gorm:"primaryKey;autoIncrement" json:"id"`
+	LoanNumber            string         `gorm:"size:255" json:"loan_number"`
+	EmployeeId            string         `gorm:"size:255" json:"employee_id"`
+	BorrowerId            string         `gorm:"size:255" json:"borrower_id"`
+	Status                string         `gorm:"size:255" json:"status"`
+	Amount                float64        `gorm:"type:decimal(10,2)" json:"amount"`
+	Interest              float64        `gorm:"type:decimal(10,2)" json:"interest"`
+	AgreementLetter       string         `gorm:"text" json:"agreement_letter"`
+	SignedAgreementLetter string         `gorm:"text" json:"signed_agreement_letter"`
+	CreatedAt             time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt             time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt             gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 var DB *gorm.DB
@@ -62,6 +77,7 @@ func AutoMigrate() error {
 	err := DB.AutoMigrate(
 		Borrower{},
 		Employee{},
+		Loan{},
 		// Add other models here as you create them
 	)
 
