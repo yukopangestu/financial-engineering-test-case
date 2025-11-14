@@ -1,19 +1,22 @@
 package service
 
 import (
+	"financial-engineering-test-case/module/borrower/domain"
 	"financial-engineering-test-case/module/borrower/dto"
-	"financial-engineering-test-case/module/borrower/repository"
 	"fmt"
 	"math/rand"
 	"time"
 )
 
 type BorrowerService struct {
-	borrowerRepository *repository.BorrowerRepository
+	borrowerRepository domain.BorrowerRepository
 }
 
+// Ensure BorrowerService implements domain.BorrowerService interface
+var _ domain.BorrowerService = (*BorrowerService)(nil)
+
 func NewBorrowerService(
-	borrowerRepository *repository.BorrowerRepository) *BorrowerService {
+	borrowerRepository domain.BorrowerRepository) *BorrowerService {
 	return &BorrowerService{
 		borrowerRepository: borrowerRepository,
 	}

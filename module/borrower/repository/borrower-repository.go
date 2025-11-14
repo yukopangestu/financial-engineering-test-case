@@ -2,6 +2,7 @@ package repository
 
 import (
 	"financial-engineering-test-case/internal/database"
+	"financial-engineering-test-case/module/borrower/domain"
 	"financial-engineering-test-case/module/borrower/dto"
 
 	"gorm.io/gorm"
@@ -10,6 +11,9 @@ import (
 type BorrowerRepository struct {
 	db *gorm.DB
 }
+
+// Ensure BorrowerRepository implements domain.BorrowerRepository interface
+var _ domain.BorrowerRepository = (*BorrowerRepository)(nil)
 
 func NewBorrowerRepository(db *gorm.DB) *BorrowerRepository {
 	return &BorrowerRepository{

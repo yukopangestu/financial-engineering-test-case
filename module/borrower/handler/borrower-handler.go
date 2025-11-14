@@ -1,19 +1,19 @@
 package handler
 
 import (
+	"financial-engineering-test-case/module/borrower/domain"
 	"financial-engineering-test-case/module/borrower/dto"
-	"financial-engineering-test-case/module/borrower/service"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type BorrowerHandler struct {
-	BorrowerService *service.BorrowerService
+	BorrowerService domain.BorrowerService
 }
 
 func NewBorrowerHandler(
-	BorrowerService *service.BorrowerService) *BorrowerHandler {
+	BorrowerService domain.BorrowerService) *BorrowerHandler {
 	return &BorrowerHandler{
 		BorrowerService: BorrowerService,
 	}
