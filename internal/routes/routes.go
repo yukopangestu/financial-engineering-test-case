@@ -31,8 +31,8 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 	employeeService := eService.NewEmployeeService(employeeRepository)
 	employeeHandler := eHandler.NewEmployeeHandler(employeeService)
 
-	loanRepository := lRepository.NewLoanRepository()
-	loanService := lService.NewLoanService(loanRepository, borrowerRepository)
+	loanRepository := lRepository.NewLoanRepository(db)
+	loanService := lService.NewLoanService(loanRepository, borrowerService)
 	loanHandler := lHandler.NewLoanHandler(loanService)
 
 	// API v1 routes
@@ -49,9 +49,6 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB) {
 		// Loan routes
 		loans := v1.Group("/loans")
 		loans.POST("/propose", loanHandler.ProposeLoan)
-		// Add more loan endpoints here
-		// loans.GET("/:id", loanHandler.GetLoan)
-		// loans.GET("", loanHandler.ListLoans)
 	}
 
 	// Health check
