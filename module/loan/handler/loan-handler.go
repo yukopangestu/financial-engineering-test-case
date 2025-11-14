@@ -102,3 +102,10 @@ func (h *LoanHandler) InvestLoan(c echo.Context) error {
 		"message": "Loan successfully invested and agreement letter generated",
 	})
 }
+
+func (h *LoanHandler) DisbursedLoan(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Loan successfully invested and agreement letter generated",
+	})
+}

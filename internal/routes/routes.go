@@ -52,7 +52,7 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 		loans.POST("/propose", loanHandler.ProposeLoan)
 		loans.PUT("/{id}/approve", loanHandler.ApproveLoan)
 		loans.PUT("/{id}/invest", loanHandler.InvestLoan)
-		loans.PUT("/{id}/disburse", loanHandler.InvestLoan)
+		loans.PUT("/{id}/disburse", loanHandler.DisbursedLoan)
 	}
 
 	// Health check
