@@ -23,3 +23,9 @@ type Investor struct {
 	ID               uint    `json:"id" validate:"required"`
 	InvestmentAmount float64 `json:"investment_amount" validate:"required,gt=0"`
 }
+
+type DisbursedLoanRequest struct {
+	EmployeeID            uint                  `json:"employee_id" validate:"required"`
+	SignedAgreementLetter *multipart.FileHeader `form:"signed_agreement_letter" validate:"required"`
+	DisbursementDate      string                `json:"disbursement_date" validate:"required"`
+}

@@ -50,7 +50,6 @@ type Loan struct {
 	UpdatedAt             time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 	DeletedAt             gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
-	// Relationships
 	Borrower          Borrower  `gorm:"foreignKey:BorrowerID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT" json:"borrower,omitempty"`
 	ApprovalEmployee  *Employee `gorm:"foreignKey:ApprovalEmployeeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"approval_employee,omitempty"`
 	DisbursedEmployee *Employee `gorm:"foreignKey:DisbursedEmployeeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL" json:"disbursed_employee,omitempty"`
@@ -77,7 +76,6 @@ type LoanInvestor struct {
 	UpdatedAt        time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
-	// Relationships
 	Loan     Loan     `gorm:"foreignKey:LoanID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"loan,omitempty"`
 	Investor Investor `gorm:"foreignKey:InvestorID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"investor,omitempty"`
 }
@@ -98,7 +96,6 @@ func InitDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Set connection pool settings
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)

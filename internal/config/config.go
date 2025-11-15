@@ -13,7 +13,6 @@ type Config struct {
 	DBPassword string
 	DBName     string
 
-	// SMTP Configuration
 	SMTPHost     string
 	SMTPPort     int
 	SMTPUsername string

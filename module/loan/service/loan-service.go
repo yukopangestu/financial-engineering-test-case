@@ -104,12 +104,12 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 	data := database.Loan{
 		ID:                 payload.ID,
 		ApprovalEmployeeID: &payload.EmployeeID,
-		AgreementLetter:    filePath, // or SignedAgreementLetter, depending on your use case
+		AgreementLetter:    filePath,
 		ApprovedAt:         &approvedAt,
 		Status:             "approved",
 	}
 
-	err = s.LoanRepository.UploadLoanByID(data) // You'll need to implement this
+	err = s.LoanRepository.UploadLoanByID(data)
 	if err != nil {
 		return fmt.Errorf("failed to update loan: %w", err)
 	}
@@ -118,9 +118,7 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 }
 
 func (s LoanService) sendInvestorEmail(investorEmail, investorName string, loanNumber string, investmentAmount float64, pdfPath string) error {
-	// Check if SMTP is configured
 	if s.Config.SMTPUsername == "" || s.Config.SMTPPassword == "" {
-		// SMTP not configured, skip sending email (log this in production)
 		return nil
 	}
 
@@ -129,7 +127,6 @@ func (s LoanService) sendInvestorEmail(investorEmail, investorName string, loanN
 	m.SetHeader("To", investorEmail)
 	m.SetHeader("Subject", "Investment Confirmation - Loan "+loanNumber)
 
-	// HTML email body
 	body := fmt.Sprintf(`
 		<html>
 		<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -167,15 +164,12 @@ func (s LoanService) sendInvestorEmail(investorEmail, investorName string, loanN
 
 	m.SetBody("text/html", body)
 
-	// Attach PDF if path is provided
 	if pdfPath != "" {
 		m.Attach(pdfPath)
 	}
 
-	// Create dialer
 	d := gomail.NewDialer(s.Config.SMTPHost, s.Config.SMTPPort, s.Config.SMTPUsername, s.Config.SMTPPassword)
 
-	// Send email
 	if err := d.DialAndSend(m); err != nil {
 		return fmt.Errorf("failed to send email to %s: %w", investorEmail, err)
 	}
@@ -192,7 +186,6 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 		return errors.New("Loan status is not eligible for this to proceed")
 	}
 
-	// Validate total investment amount
 	totalInvestment := 0.0
 	for _, investor := range payload.Investors {
 		totalInvestment += investor.InvestmentAmount
@@ -202,12 +195,10 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 		return fmt.Errorf("total investment amount ($%.2f) must equal loan amount ($%.2f)", totalInvestment, loan.Amount)
 	}
 
-	// Validate and create loan-investor records
 	var loanInvestors []database.LoanInvestor
-	var investorDetails []database.Investor // Store investor details for later email sending
+	var investorDetails []database.Investor
 
 	for _, investor := range payload.Investors {
-		// Check if investor exists
 		inv, err := s.LoanRepository.GetInvestorByID(investor.ID)
 		if err != nil {
 			return fmt.Errorf("investor with ID %d not found: %w", investor.ID, err)
@@ -216,7 +207,6 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 			return fmt.Errorf("investor with ID %d does not exist", investor.ID)
 		}
 
-		// Create loan-investor record
 		loanInvestor := database.LoanInvestor{
 			LoanID:           id,
 			InvestorID:       investor.ID,
@@ -232,13 +222,11 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 		investorDetails = append(investorDetails, inv)
 	}
 
-	// Generate PDF agreement letter
 	pdfPath, err := s.generateAgreementLetterPDF(loan, loanInvestors)
 	if err != nil {
 		return fmt.Errorf("failed to generate agreement letter: %w", err)
 	}
 
-	// Update loan status and set invested date
 	investedAt := time.Now()
 	updatedLoan := database.Loan{
 		ID:              id,
@@ -252,13 +240,10 @@ func (s LoanService) InvestLoan(payload *dto.InvestLoanRequest, id uint) error {
 		return fmt.Errorf("failed to update loan: %w", err)
 	}
 
-	// Send confirmation emails to all investors with PDF attachment
 	for i, investor := range loanInvestors {
 		inv := investorDetails[i]
 		err = s.sendInvestorEmail(inv.Email, inv.Name, loan.LoanNumber, investor.InvestmentAmount, pdfPath)
 		if err != nil {
-			// Log the error but don't fail the entire transaction
-			// In production, you might want to queue this for retry
 			fmt.Printf("Warning: failed to send email to investor %s: %v\n", inv.Email, err)
 		}
 	}
@@ -270,17 +255,14 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Title
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(0, 10, "LOAN INVESTMENT AGREEMENT LETTER")
 	pdf.Ln(15)
 
-	// Date
 	pdf.SetFont("Arial", "", 12)
 	pdf.Cell(0, 10, fmt.Sprintf("Date: %s", time.Now().Format("January 2, 2006")))
 	pdf.Ln(10)
 
-	// Loan Details Section
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(0, 10, "Loan Details")
 	pdf.Ln(8)
@@ -302,7 +284,6 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 	pdf.Cell(0, 8, fmt.Sprintf("%d", loan.BorrowerID))
 	pdf.Ln(12)
 
-	// Investors Section
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(0, 10, "Investment Details")
 	pdf.Ln(8)
@@ -335,7 +316,6 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 	pdf.Cell(0, 8, fmt.Sprintf("$%.2f", totalInvestment))
 	pdf.Ln(15)
 
-	// Terms and Conditions
 	pdf.SetFont("Arial", "B", 14)
 	pdf.Cell(0, 10, "Terms and Conditions")
 	pdf.Ln(8)
@@ -356,7 +336,6 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 
 	pdf.Ln(15)
 
-	// Signatures
 	pdf.SetFont("Arial", "B", 12)
 	pdf.Cell(0, 10, "Signatures")
 	pdf.Ln(10)
@@ -368,12 +347,10 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 	pdf.Cell(90, 6, "Authorized Officer")
 	pdf.Cell(90, 6, "Date")
 
-	// Save PDF
 	uploadDir := "./uploads/agreement-letters"
 	os.MkdirAll(uploadDir, os.ModePerm)
 
 	fileName := fmt.Sprintf("agreement_%s_%d.pdf", loan.LoanNumber, time.Now().Unix())
-	// Replace "/" in loan number with "_" for valid filename
 	fileName = filepath.Join(uploadDir, filepath.Base(fileName))
 
 	err := pdf.OutputFileAndClose(fileName)
@@ -382,4 +359,57 @@ func (s LoanService) generateAgreementLetterPDF(loan database.Loan, investors []
 	}
 
 	return fileName, nil
+}
+
+func (s LoanService) DisburseLoan(payload *dto.DisbursedLoanRequest, id uint) error {
+	loan, err := s.LoanRepository.GetLoanByID(id)
+	if err != nil {
+		return fmt.Errorf("failed to get loan: %w", err)
+	}
+
+	if loan.Status != "invested" {
+		return errors.New("loan status is not eligible for disbursement (must be 'invested')")
+	}
+
+	src, err := payload.SignedAgreementLetter.Open()
+	if err != nil {
+		return fmt.Errorf("error when opening signed agreement letter: %w", err)
+	}
+	defer src.Close()
+
+	uploadDir := "./uploads/signed-agreement-letters"
+	os.MkdirAll(uploadDir, os.ModePerm)
+
+	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), payload.SignedAgreementLetter.Filename)
+	filePath := filepath.Join(uploadDir, fileName)
+
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return fmt.Errorf("failed to save signed agreement letter: %w", err)
+	}
+
+	disbursementDate, err := time.Parse("2006-01-02", payload.DisbursementDate)
+	if err != nil {
+		return fmt.Errorf("invalid disbursement date format (expected YYYY-MM-DD): %w", err)
+	}
+
+	updatedLoan := database.Loan{
+		ID:                    id,
+		DisbursedEmployeeID:   &payload.EmployeeID,
+		SignedAgreementLetter: filePath,
+		DisbursementDate:      &disbursementDate,
+		Status:                "disbursed",
+	}
+
+	err = s.LoanRepository.UploadLoanByID(updatedLoan)
+	if err != nil {
+		return fmt.Errorf("failed to update loan with disbursement info: %w", err)
+	}
+
+	return nil
 }

@@ -21,12 +21,10 @@ import (
 )
 
 func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
-	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	// Initialize handlers
 	borrowerRepository := bRepository.NewBorrowerRepository(db)
 	borrowerService := bService.NewBorrowerService(borrowerRepository)
 	borrowerHandler := bHandler.NewBorrowerHandler(borrowerService)
@@ -43,22 +41,17 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 	loanService := lService.NewLoanService(loanRepository, borrowerService, cfg)
 	loanHandler := lHandler.NewLoanHandler(loanService)
 
-	// API v1 routes
 	v1 := e.Group("/api/v1")
 	{
-		// Managing Borrowers data
 		borrowers := v1.Group("/borrowers")
 		borrowers.POST("/", borrowerHandler.CreateBorrower)
 
-		// Managing Employees data
 		employees := v1.Group("/employees")
 		employees.POST("/", employeeHandler.CreateEmployee)
 
-		// Managing Investors data
 		investors := v1.Group("/investors")
 		investors.POST("/", investorHandler.CreateInvestor)
 
-		// Loan routes
 		loans := v1.Group("/loans")
 		loans.POST("/propose", loanHandler.ProposeLoan)
 		loans.PUT("/{id}/approve", loanHandler.ApproveLoan)
@@ -66,7 +59,6 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 		loans.PUT("/{id}/disburse", loanHandler.DisbursedLoan)
 	}
 
-	// Health check
 	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(200, map[string]string{"status": "ok"})
 	})

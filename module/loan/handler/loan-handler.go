@@ -104,8 +104,33 @@ func (h *LoanHandler) InvestLoan(c echo.Context) error {
 }
 
 func (h *LoanHandler) DisbursedLoan(c echo.Context) error {
+	var req dto.DisbursedLoanRequest
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, map[string]interface{}{
+			"message": err.Error(),
+			"code":    http.StatusBadRequest,
+		})
+	}
+
+	id := c.Param("id")
+	loanID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid loan ID",
+		})
+	}
+
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	err = h.LoanService.DisburseLoan(&req, uint(loanID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
 
 	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Loan successfully invested and agreement letter generated",
+		"message": "Loan successfully disbursed",
 	})
 }

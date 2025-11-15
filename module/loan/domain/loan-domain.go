@@ -15,4 +15,5 @@ type LoanService interface {
 	ProposeLoan(payload *dto.ProposeLoanRequest) error
 	ApproveLoan(payload *dto.ApproveLoanRequest) error
 	InvestLoan(payload *dto.InvestLoanRequest, id uint) error
+	DisburseLoan(payload *dto.DisbursedLoanRequest, id uint) error
 }
