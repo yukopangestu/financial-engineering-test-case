@@ -1,5 +1,7 @@
 # financial-engineering-test-case
-Hi engineering team that review this codes. So, for the challenge i have chosen the third question regarding borrowers and investor in loan.
+Hi engineering team that review this codes. Let me introduce myself, my name is Yuko Pangestu, one of the candidate for your company. 
+
+So, for the challenge i have chosen the third question regarding borrowers and investor in loan.
 
 # System Requirements
 - Docker (needed for multiple environment build situation)
