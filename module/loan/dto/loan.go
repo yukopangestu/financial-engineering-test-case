@@ -29,3 +29,11 @@ type DisbursedLoanRequest struct {
 	SignedAgreementLetter *multipart.FileHeader `form:"signed_agreement_letter" validate:"required"`
 	DisbursementDate      string                `form:"disbursement_date" validate:"required"`
 }
+
+type LoanDetailsResponse struct {
+	BorrowerID               uint    `json:"borrower_id"`
+	PrincipalAmount          float64 `json:"principal_amount"`
+	InterestRate             float64 `json:"interest_rate"`
+	ROI                      float64 `json:"roi"`
+	SignedAgreementLetterURL string  `json:"signed_agreement_letter_url"`
+}

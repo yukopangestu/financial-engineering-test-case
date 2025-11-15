@@ -414,3 +414,24 @@ func (s LoanService) DisburseLoan(payload *dto.DisbursedLoanRequest, id uint) er
 
 	return nil
 }
+
+func (s LoanService) GetLoanDetails(id uint) (*dto.LoanDetailsResponse, error) {
+	loan, err := s.LoanRepository.GetLoanByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get loan: %w", err)
+	}
+
+	// Calculate ROI (Return on Investment)
+	// ROI = (Principal Amount * Interest Rate) / 100
+	roi := (loan.Amount * loan.Interest) / 100
+
+	response := &dto.LoanDetailsResponse{
+		BorrowerID:               loan.BorrowerID,
+		PrincipalAmount:          loan.Amount,
+		InterestRate:             loan.Interest,
+		ROI:                      roi,
+		SignedAgreementLetterURL: loan.SignedAgreementLetter,
+	}
+
+	return response, nil
+}

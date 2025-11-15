@@ -168,6 +168,118 @@
 					"response": []
 				},
 				{
+					"name": "Get Loan Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/loans/{{loan_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"{{loan_id}}"
+							]
+						},
+						"description": "Retrieve detailed information about a specific loan including:\n- Borrower ID\n- Principal amount (loan amount)\n- Interest rate\n- ROI (Return on Investment) - calculated as (Principal × Interest Rate) / 100\n- Signed agreement letter URL (available after disbursement)\n\nExample Response:\n{\n  \"message\": \"Loan details retrieved successfully\",\n  \"data\": {\n    \"borrower_id\": 1,\n    \"principal_amount\": 5000000,\n    \"interest_rate\": 10.5,\n    \"roi\": 525000,\n    \"signed_agreement_letter_url\": \"./uploads/signed-agreement-letters/1234567890_agreement.pdf\"\n  }\n}"
+					},
+					"response": [
+						{
+							"name": "Success - Loan Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/loans/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"loans",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Loan details retrieved successfully\",\n    \"data\": {\n        \"borrower_id\": 1,\n        \"principal_amount\": 5000000,\n        \"interest_rate\": 10.5,\n        \"roi\": 525000,\n        \"signed_agreement_letter_url\": \"./uploads/signed-agreement-letters/1705234567_signed_agreement.pdf\"\n    }\n}"
+						},
+						{
+							"name": "Error - Loan Not Found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/loans/99999",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"loans",
+										"99999"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Loan not found\",\n    \"error\": \"failed to get loan: record not found\",\n    \"code\": 404\n}"
+						},
+						{
+							"name": "Error - Invalid Loan ID",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/loans/abc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"loans",
+										"abc"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid loan ID\",\n    \"code\": 400\n}"
+						}
+					]
+				},
+				{
 					"name": "Approve Loan",
 					"request": {
 						"method": "PUT",
@@ -287,6 +399,11 @@
 		{
 			"key": "base_url",
 			"value": "http://localhost:11230",
+			"type": "string"
+		},
+		{
+			"key": "loan_id",
+			"value": "1",
 			"type": "string"
 		}
 	]

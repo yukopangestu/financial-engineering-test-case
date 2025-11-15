@@ -139,3 +139,28 @@ func (h *LoanHandler) DisbursedLoan(c echo.Context) error {
 		"message": "Loan successfully disbursed",
 	})
 }
+
+func (h *LoanHandler) GetLoanDetails(c echo.Context) error {
+	id := c.Param("id")
+	loanID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message": "Invalid loan ID",
+			"code":    http.StatusBadRequest,
+		})
+	}
+
+	loanDetails, err := h.LoanService.GetLoanDetails(uint(loanID))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"message": "Loan not found",
+			"error":   err.Error(),
+			"code":    http.StatusNotFound,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "Loan details retrieved successfully",
+		"data":    loanDetails,
+	})
+}
