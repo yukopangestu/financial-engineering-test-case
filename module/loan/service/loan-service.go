@@ -44,7 +44,7 @@ func (s LoanService) ProposeLoan(payload *dto.ProposeLoanRequest) error {
 
 	borrowers, err := s.BorrowerService.GetBorrowerById(payload.BorrowerId)
 	if err != nil {
-		return fmt.Errorf("Error while fecthing the borrowers", err)
+		return fmt.Errorf("Error while fecthing the borrowers: %w", err)
 	}
 	if borrowers.ID == 0 {
 		return errors.New("borrower not exist")
@@ -60,7 +60,7 @@ func (s LoanService) ProposeLoan(payload *dto.ProposeLoanRequest) error {
 
 	err = s.LoanRepository.CreateNewLoan(data)
 	if err != nil {
-		return fmt.Errorf("Error when creating new loan", err)
+		return fmt.Errorf("Error when creating new loan: %w", err)
 	}
 
 	return nil
@@ -77,7 +77,7 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 
 	src, err := payload.PhotoOfVisit.Open()
 	if err != nil {
-		return fmt.Errorf("Error when opening photo of visit", err)
+		return fmt.Errorf("Error when opening photo of visit: %w", err)
 	}
 	defer src.Close()
 
@@ -89,7 +89,7 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 
 	dst, err := os.Create(filePath)
 	if err != nil {
-		return fmt.Errorf("Failed to Create File", err)
+		return fmt.Errorf("Failed to Create File: %w", err)
 	}
 	defer dst.Close()
 
