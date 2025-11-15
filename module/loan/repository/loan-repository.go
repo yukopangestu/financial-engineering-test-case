@@ -41,7 +41,7 @@ func (r LoanRepository) GetLoanByID(id uint) (database.Loan, error) {
 }
 
 func (r LoanRepository) UploadLoanByID(data database.Loan) error {
-	result := r.db.Save(&data)
+	result := r.db.Model(&database.Loan{}).Where("id = ?", data.ID).Updates(&data)
 	if result.Error != nil {
 		return result.Error
 	}

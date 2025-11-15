@@ -4,6 +4,7 @@ import (
 	"financial-engineering-test-case/internal/config"
 	"financial-engineering-test-case/internal/database"
 	"financial-engineering-test-case/internal/routes"
+	"financial-engineering-test-case/internal/validator"
 	"log"
 
 	"github.com/labstack/echo/v4"
@@ -23,6 +24,7 @@ func StartApp() {
 	}
 
 	e := echo.New()
+	e.Validator = validator.NewValidator()
 
 	routes.SetupRoutes(e, db, cfg)
 

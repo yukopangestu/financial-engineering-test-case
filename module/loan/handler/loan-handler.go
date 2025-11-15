@@ -66,6 +66,11 @@ func (h *LoanHandler) ApproveLoan(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
+	err = h.LoanService.ApproveLoan(&req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, map[string]string{
 		"message": "Loan successfully approved",
 	})

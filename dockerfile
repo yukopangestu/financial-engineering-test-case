@@ -30,6 +30,10 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/main .
 
+# Create upload directories and set ownership
+RUN mkdir -p /app/uploads/visit-documents /app/uploads/agreement-letters /app/uploads/signed-agreement-letters && \
+    chown -R appuser:appuser /app
+
 # Use non-root user
 USER appuser
 

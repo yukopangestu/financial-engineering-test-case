@@ -55,6 +55,7 @@ func (s LoanService) ProposeLoan(payload *dto.ProposeLoanRequest) error {
 		BorrowerID: payload.BorrowerId,
 		Interest:   payload.InterestRate,
 		LoanNumber: fmt.Sprintf("%d/%d/%d", time.Now().Year(), time.Now().Month(), rand.Int()),
+		Status:     "proposed",
 	}
 
 	err = s.LoanRepository.CreateNewLoan(data)
@@ -104,7 +105,7 @@ func (s LoanService) ApproveLoan(payload *dto.ApproveLoanRequest) error {
 	data := database.Loan{
 		ID:                 payload.ID,
 		ApprovalEmployeeID: &payload.EmployeeID,
-		AgreementLetter:    filePath,
+		ProofOfVisit:       filePath,
 		ApprovedAt:         &approvedAt,
 		Status:             "approved",
 	}

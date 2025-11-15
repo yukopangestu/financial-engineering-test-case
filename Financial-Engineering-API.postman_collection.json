@@ -141,34 +141,15 @@
 					"name": "Propose Loan",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "borrower_id",
-									"value": "1",
-									"type": "text",
-									"description": "ID of the borrower"
-								},
-								{
-									"key": "amount",
-									"value": "5000000",
-									"type": "text",
-									"description": "Loan amount"
-								},
-								{
-									"key": "interest_rate",
-									"value": "10.5",
-									"type": "text",
-									"description": "Interest rate percentage"
-								},
-								{
-									"key": "proof_of_visit",
-									"type": "file",
-									"description": "Upload proof of visit document (PDF, Image, etc.)"
-								}
-							]
+							"mode": "raw",
+							"raw": "{\n  \"borrower_id\": 1,\n  \"amount\": 5000000,\n  \"interest_rate\": 10.5\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/loans/propose",
@@ -182,7 +163,7 @@
 								"propose"
 							]
 						},
-						"description": "Propose a new loan. Initial status is 'proposed'. Upload proof of visit document."
+						"description": "Propose a new loan. Initial status is 'proposed'."
 					},
 					"response": []
 				},

@@ -4,15 +4,15 @@ import "mime/multipart"
 
 type ProposeLoanRequest struct {
 	BorrowerId   uint    `json:"borrower_id" validate:"required"`
-	Amount       float64 `json:"amount" validate:"required, gt=0"`
-	InterestRate float64 `json:"interest_rate" validate:"required, gt=0"`
+	Amount       float64 `json:"amount" validate:"required,gt=0"`
+	InterestRate float64 `json:"interest_rate" validate:"required,gt=0"`
 }
 
 type ApproveLoanRequest struct {
 	ID           uint                  `json:"id"`
-	EmployeeID   uint                  `json:"employee_id" validate:"required"`
-	PhotoOfVisit *multipart.FileHeader `from:"document" validate:"required"`
-	ApprovalDate string                `json:"approval_date" validate:"required"`
+	EmployeeID   uint                  `form:"employee_id" validate:"required"`
+	PhotoOfVisit *multipart.FileHeader `form:"document" validate:"required"`
+	ApprovalDate string                `form:"approval_date" validate:"required"`
 }
 
 type InvestLoanRequest struct {
@@ -25,7 +25,7 @@ type Investor struct {
 }
 
 type DisbursedLoanRequest struct {
-	EmployeeID            uint                  `json:"employee_id" validate:"required"`
+	EmployeeID            uint                  `form:"employee_id" validate:"required"`
 	SignedAgreementLetter *multipart.FileHeader `form:"signed_agreement_letter" validate:"required"`
-	DisbursementDate      string                `json:"disbursement_date" validate:"required"`
+	DisbursementDate      string                `form:"disbursement_date" validate:"required"`
 }

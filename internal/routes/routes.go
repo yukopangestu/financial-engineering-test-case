@@ -54,9 +54,9 @@ func SetupRoutes(e *echo.Echo, db *gorm.DB, cfg *config.Config) {
 
 		loans := v1.Group("/loans")
 		loans.POST("/propose", loanHandler.ProposeLoan)
-		loans.PUT("/{id}/approve", loanHandler.ApproveLoan)
-		loans.PUT("/{id}/invest", loanHandler.InvestLoan)
-		loans.PUT("/{id}/disburse", loanHandler.DisbursedLoan)
+		loans.PUT("/:id/approve", loanHandler.ApproveLoan)
+		loans.PUT("/:id/invest", loanHandler.InvestLoan)
+		loans.PUT("/:id/disburse", loanHandler.DisbursedLoan)
 	}
 
 	e.GET("/health", func(c echo.Context) error {
