@@ -1,0 +1,312 @@
+{
+	"info": {
+		"_postman_id": "financial-engineering-api",
+		"name": "Financial Engineering API",
+		"description": "API collection for Financial Engineering Test Case - Loan Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Check if the API is running"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Create Employee",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"phone_number\": \"+62-812-3456-7890\",\n  \"email\": \"john.doe@company.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								""
+							]
+						},
+						"description": "Create a new employee. Employee number is auto-generated in format YYYY/MM/RANDOM_INT"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Borrowers",
+			"item": [
+				{
+					"name": "Create Borrower",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ahmad Pratama\",\n  \"phone_number\": \"+62-821-1111-2222\",\n  \"email\": \"ahmad.pratama@email.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/borrowers/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"borrowers",
+								""
+							]
+						},
+						"description": "Create a new borrower. Borrower number is auto-generated in format YYYY/MM/RANDOM_INT"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Investors",
+			"item": [
+				{
+					"name": "Create Investor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Robert Anderson\",\n  \"phone_number\": \"+62-831-1111-2222\",\n  \"email\": \"robert.anderson@investor.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/investors/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"investors",
+								""
+							]
+						},
+						"description": "Create a new investor. Investor number is auto-generated in format YYYY/MM/RANDOM_INT. InvestedAmount is initialized to 0."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loans",
+			"item": [
+				{
+					"name": "Propose Loan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "borrower_id",
+									"value": "1",
+									"type": "text",
+									"description": "ID of the borrower"
+								},
+								{
+									"key": "amount",
+									"value": "5000000",
+									"type": "text",
+									"description": "Loan amount"
+								},
+								{
+									"key": "interest_rate",
+									"value": "10.5",
+									"type": "text",
+									"description": "Interest rate percentage"
+								},
+								{
+									"key": "proof_of_visit",
+									"type": "file",
+									"description": "Upload proof of visit document (PDF, Image, etc.)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/loans/propose",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"propose"
+							]
+						},
+						"description": "Propose a new loan. Initial status is 'proposed'. Upload proof of visit document."
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Loan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "employee_id",
+									"value": "1",
+									"type": "text",
+									"description": "ID of the employee approving the loan"
+								},
+								{
+									"key": "approval_date",
+									"value": "2025-01-15",
+									"type": "text",
+									"description": "Date of approval (YYYY-MM-DD)"
+								},
+								{
+									"key": "document",
+									"type": "file",
+									"description": "Upload agreement letter or approval document"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/loans/{{loan_id}}/approve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"{{loan_id}}",
+								"approve"
+							]
+						},
+						"description": "Approve a proposed loan. Changes status from 'proposed' to 'approved'. Upload agreement letter document."
+					},
+					"response": []
+				},
+				{
+					"name": "Invest in Loan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "investors",
+									"value": "[{\"id\": 1, \"investment_amount\": 2000000}, {\"id\": 2, \"investment_amount\": 3000000}]",
+									"type": "text",
+									"description": "JSON array of investors with their investment amounts"
+								},
+								{
+									"key": "signed_agreement_letter",
+									"type": "file",
+									"description": "Upload signed agreement letter (PDF)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/loans/{{loan_id}}/invest",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"{{loan_id}}",
+								"invest"
+							]
+						},
+						"description": "Add investors to an approved loan. Changes status from 'approved' to 'invested'. Total investment amount must equal the loan amount. Upload signed agreement letter."
+					},
+					"response": []
+				},
+				{
+					"name": "Disburse Loan",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"employee_id\": 1,\n  \"disbursement_date\": \"2025-01-15\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/loans/{{loan_id}}/disburse",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"loans",
+								"{{loan_id}}",
+								"disburse"
+							]
+						},
+						"description": "Disburse an invested loan. Changes status from 'invested' to 'disbursed'. Sends email notifications to all investors."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:11230",
+			"type": "string"
+		}
+	]
+}

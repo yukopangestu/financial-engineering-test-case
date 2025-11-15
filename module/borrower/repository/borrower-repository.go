@@ -21,7 +21,14 @@ func NewBorrowerRepository(db *gorm.DB) *BorrowerRepository {
 }
 
 func (b BorrowerRepository) CreateNewBorrower(borrowerData dto.CreaterBorrower) error {
-	result := b.db.Create(&borrowerData)
+	borrower := database.Borrower{
+		Name:           borrowerData.Name,
+		BorrowerNumber: borrowerData.BorrowerNum,
+		PhoneNumber:    borrowerData.PhoneNumber,
+		Email:          borrowerData.Email,
+	}
+
+	result := b.db.Create(&borrower)
 	if result.Error != nil {
 		return result.Error
 	}

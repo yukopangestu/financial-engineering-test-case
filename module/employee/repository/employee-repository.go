@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"financial-engineering-test-case/internal/database"
 	"financial-engineering-test-case/module/employee/domain"
 	"financial-engineering-test-case/module/employee/dto"
 
@@ -20,7 +21,14 @@ func NewEmployeeRepository(db *gorm.DB) *EmployeeRepository {
 }
 
 func (e EmployeeRepository) CreateNewEmployee(employeeData dto.CreateEmployee) error {
-	result := e.db.Create(&employeeData)
+	employee := database.Employee{
+		Name:           employeeData.Name,
+		EmployeeNumber: employeeData.EmployeeNum,
+		PhoneNumber:    employeeData.PhoneNumber,
+		Email:          employeeData.Email,
+	}
+
+	result := e.db.Create(&employee)
 	if result.Error != nil {
 		return result.Error
 	}
